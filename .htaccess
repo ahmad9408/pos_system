@@ -1,0 +1,7 @@
+DirectoryIndex /pos_system/home.php
+
+RewriteEngine on
+RewriteCond %{SCRIPT_FILENAME} !-f
+RewriteCond %{SCRIPT_FILENAME} !-d
+RewriteCond %{SCRIPT_FILENAME} !-l
+RewriteRule ^(.*)$ $1.php
