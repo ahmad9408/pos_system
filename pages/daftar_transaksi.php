@@ -24,20 +24,20 @@ if($akhir==''){
 }
 
 if($awal!='' AND $akhir!=''){
-  $cari_tgl = " AND tgl_transaksi BETWEEN '$awal' AND '$akhir'";
+  $cari_tgl = " AND t.tgl_transaksi BETWEEN '$awal' AND '$akhir'";
 }else{
   $cari_tgl = "";
 }
 
 
 if($no_transaksi != ""){
-  $cari_no_transaksi = " AND no_transaksi = '$no_transaksi'";
+  $cari_no_transaksi = " AND t.no_transaksi = '$no_transaksi'";
 }else{
   $cari_no_transaksi = "";
 }
 
 if($status_transaksi != ""){
-  $cari_status_transaksi = " AND is_aktif = '$status_transaksi'";
+  $cari_status_transaksi = " AND t.is_aktif = '$status_transaksi'";
 }else{
   $cari_status_transaksi = "";
 }
@@ -160,6 +160,7 @@ if($status_transaksi != ""){
                   <th scope="col">Diskon</th>
                   <th scope="col">Total Akhir</th>
                   <th scope="col">Total Non Cash</th>
+                  <th scope="col">Jenis Pembayaran</th>
                   <th scope="col">Total Cash</th>
                   <th scope="col">Total Yang Harus di Bayar</th>
                   <th scope="col">Total Bayar</th>
@@ -174,31 +175,34 @@ if($status_transaksi != ""){
                 <?php
                   
                     $sql_daftar_penjualan = "SELECT
-                                              `no_transaksi`
-                                              , `tgl_transaksi`
-                                              , `id_kasir`
-                                              , `subtotal`
-                                              , `qty`
-                                              , `diskon`
-                                              , `total_akhir`
-                                              , `total_non_cash` 
-                                              , `total_cash`
-                                              , `total_pembayaran`
-                                              , `total_bayar`
-                                              , `kembalian`
-                                              , `updatedate`
-                                              , `tgl_batal`
-                                              , `is_aktif`
-                                              , `is_upload`
-                                              , `tgl_upload`
+                                              t.`no_transaksi`,
+                                              t.`tgl_transaksi`,
+                                              t.`id_kasir`,
+                                              t.`subtotal`,
+                                              t.`qty`,
+                                              t.`diskon`,
+                                              t.`total_akhir`,
+                                              t.`total_non_cash`,
+                                              t.`total_cash`,
+                                              j.`jenis`,
+                                              t.`total_pembayaran`,
+                                              t.`total_bayar`,
+                                              t.`kembalian`,
+                                              t.`updatedate`,
+                                              t.`tgl_batal`,
+                                              t.`is_aktif`,
+                                              t.`is_upload`,
+                                              t.`tgl_upload`
                                           FROM
-                                              `tbl_transaksi`
-                                          WHERE no_transaksi != '' $cari_tgl $cari_no_transaksi $cari_status_transaksi
-                                          ORDER BY updatedate DESC";
+                                            `tbl_transaksi` AS t
+                                            LEFT JOIN `tbl_transaksi_non_cash` AS tn ON t.no_transaksi=tn.no_Transaksi
+                                            LEFT JOIN tbl_jenis_bayar AS j ON tn.jenis_bayar=j.id
+                                          WHERE t.no_transaksi != '' $cari_tgl $cari_no_transaksi $cari_status_transaksi
+                                          ORDER BY t.updatedate DESC";
 
                     $res_mst_barang = mysqli_query($connect,$sql_daftar_penjualan);
                     if($session_id_group==1){
-                      // echo $sql_2;
+                      // echo $sql_daftar_penjualan;
                     }
                     while($data=mysqli_fetch_array($res_mst_barang)){
                       $no++;
@@ -211,6 +215,7 @@ if($status_transaksi != ""){
                       $diskon = $data['diskon'];
                       $total_akhir = $data['total_akhir'];
                       $total_non_cash = $data['total_non_cash'];
+                      $jenis = $data['jenis'];
                       $total_cash = $data['total_cash'];
                       $total_pembayaran = $data['total_pembayaran'];
                       $total_bayar = $data['total_bayar'];
@@ -245,6 +250,7 @@ if($status_transaksi != ""){
                   <td align="center"><?php echo $diskon;?></td>
                   <td align="left">Rp. <span style="float: right"><?php echo number_format($total_akhir);?></span></td>
                   <td align="left">Rp. <span style="float: right"><?php echo number_format($total_non_cash);?></span></td>
+                  <td align="left"><?php echo $jenis;?></td>
                   <td align="left">Rp. <span style="float: right"><?php echo number_format($total_cash);?></span></td>
                   <td align="left">Rp. <span style="float: right"><?php echo number_format($total_pembayaran);?></span></td>
                   <td align="left">Rp. <span style="float: right"><?php echo number_format($total_bayar);?></span></td>
